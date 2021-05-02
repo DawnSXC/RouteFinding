@@ -118,18 +118,18 @@ static inline void adjacency_list_shortest_path(struct adjacency_list *al, long 
 				al->al_paths[pl->l_oid] = v;
 			}
 	}
-    // no roads 
+
 	if (al->al_lens[k1] == FLT_MAX) {
-		printf("No roads between %ld and %ld.\n", id, ide); 
+		printf("No roads between %ld and %ld.\n", id, ide);
 		return;
 	}
-    
+
 	FILE *filp_result = NULL;
 	if ((filp_result = fopen(name_result, "w")) == NULL) {
 		printf("Open failed.\n");
 		exit(-1);
 	}
-    // find roads
+
 	float ll = al->al_lens[k1];
 	printf("Find roads between %ld and %ld: \n\t", ide, id);
 	printf("%ld ", ide);
@@ -140,13 +140,12 @@ static inline void adjacency_list_shortest_path(struct adjacency_list *al, long 
 		fprintf(filp_result, "set arrow from %f,%f to %f,%f lt 3 lw 2\n", al->al_x[al->al_paths[k1]], al->al_y[al->al_paths[k1]], al->al_x[k1], al->al_y[k1]);
 		k1 = al->al_paths[k1];
 	}
-	//store found data
 	fclose(filp_result);
 	printf("\n");
 	printf("Length:\n\t%f\n", ll);
 	return;
 }
-// add node to adjacency_list
+	
 static inline int adjacency_list_add_node(struct adjacency_list *al, long id, float x, float y)
 {
 	struct hash_entry *p_hash_entry;
@@ -165,7 +164,76 @@ static inline int adjacency_list_add_node(struct adjacency_list *al, long id, fl
 	}
 }
 
+static inline void adjacency_list_add_link(struct adjacency_list *al, long n0, long n1, float len)
+{
+	struct hash_entry *p_hash_entry;
+	long k0, k1;
+	struct link *l0, *l1;
 
+	p_hash_entry = hash_table_search(al->al_ht, n0);
+	k0 = p_hash_entry->h_map->m_inc;
+	p_hash_entry = hash_table_search(al->al_ht, n1);
+	k1 = p_hash_entry->h_map->m_inc;
 
+	l0 = (struct link *)malloc(sizeof(struct link));
+	l0->l_len = len;
+	l0->l_oid = k1;
+	init_list_head(&l0->l_list);
+	list_add(&l0->l_list, al->al_head + k0);
+
+	l1 = (struct link *)malloc(sizeof(struct link));
+	l1->l_len = len;
+	l1->l_oid = k0;
+	init_list_head(&l1->l_list);
+	list_add(&l1->l_list, al->al_head + k1);
+}
+
+static inline void clear_adjacency_list(struct adjacency_list *al)
+{
+	int i;
+	struct link *pl, *n;
+
+	clear_hash_table(al->al_ht);
+	for (i = 0; i < al->al_size; ++i)
+		list_for_each_entry_safe(pl, n, al->al_head + i, l_list) {
+			list_del(&pl->l_list);
+			free(pl);
+		}
+
+	free(al->al_head);
+	free(al->al_real_id);
+	free(al->al_flags);
+	free(al->al_lens);
+	free(al->al_paths);
+	free(al->al_x);
+	free(al->al_y);
+	free(al);
+}
+
+static inline void adjacency_list_disp(struct adjacency_list *al, const char *name_node, const char *name_link)
+{
+	FILE *filp_node = NULL;
+	FILE *filp_link = NULL;
+	int i;
+	struct link *pl;
+
+	if ((filp_node = fopen(name_node, "w")) == NULL) {
+		printf("Open failed.\n");
+		exit(-1);
+	}
+	if ((filp_link = fopen(name_link, "w")) == NULL) {
+		printf("Open failed.\n");
+		exit(-1);
+	}
+
+	for (i = 0; i < al->al_curr; ++i) {
+		fprintf(filp_node, "%f %f\n", al->al_x[i], al->al_y[i]);
+		list_for_each_entry(pl, al->al_head + i, l_list)
+			fprintf(filp_link, "set arrow from %f,%f to %f,%f\n", al->al_x[i], al->al_y[i], al->al_x[pl->l_oid], al->al_y[pl->l_oid]);
+	}
+	
+	fclose(filp_node);
+	fclose(filp_link);
+}
 
 #endif // __GRAPH_ADJACENCY_LIST_H__
