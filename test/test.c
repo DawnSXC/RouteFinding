@@ -5,6 +5,8 @@
 int main()
 {
 	int i, j;
+	int false = 0;
+
 	struct hash_table *pht = init_hash_table(5);
 	printf("init_hash_table OK\n");
 
@@ -19,18 +21,38 @@ int main()
 			printf("%d not find\n", i);
 	}
 
+	for (i = -20; i < 25; ++i) {
+		if ((i < -10 || i >=20) && hash_table_search(pht, i)) {
+			false = 1;
+			break;
+		}
+		else if ((i >= -10 && i < 20) && !hash_table_search(pht,i)) {
+			false = 1;
+			break;
+		}
+	}
+	if (!false)
+		printf("hash_table_insert AND hash_table_search CHECK OK\n");
+	else
+		printf("hash_table_insert AND hash_table_search CHECK FAILED\n");
+
 	clear_hash_table(pht);
 
 
 	struct adjacency_list *al = init_adjacency_list(20);
 	for (i = 1; i < 15; ++i)
-		adjacency_list_add_node(al, i);
+		adjacency_list_add_node(al, i, i, i);
 
-	for (i = 1; i < 15; ++i)
-		for (j = 1; j < 15; ++j)
-			if (i < j)
-				adjacency_list_add_link(al, i, j, 1);
+	printf("Shortest path for empty graph:\n");
+	adjacency_list_shortest_path(al, 1, 3, "test_empty_shortest_path");
 
-	adjacency_list_disp(al);
+	printf("Shortest path for non-empty graph\n");
+	adjacency_list_add_link(al, 1, 3, 1);
+	adjacency_list_add_link(al, 3, 6, 1);
+	adjacency_list_add_link(al, 1, 6, 3);
+
+	adjacency_list_shortest_path(al, 1, 6, "test_short_path");	
+
+	adjacency_list_disp(al, "test_node", "test_link");
 	clear_adjacency_list(al);
 }
