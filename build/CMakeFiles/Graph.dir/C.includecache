@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/xuechen/graph/adjacency_list.h
+list.h
+/home/xuechen/graph/list.h
+hash.h
+/home/xuechen/graph/hash.h
+stdio.h
+-
+float.h
+-
+
+/home/xuechen/graph/graph.c
+adjacency_list.h
+/home/xuechen/graph/adjacency_list.h
+stdio.h
+-
+regex.h
+-
+limits.h
+-
+string.h
+-
+stdlib.h
+-
+
+/home/xuechen/graph/hash.h
+list.h
+/home/xuechen/graph/list.h
+
+/home/xuechen/graph/list.h
+stdlib.h
+-
+stddef.h
+-
+
